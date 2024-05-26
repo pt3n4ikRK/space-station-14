@@ -15,6 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="All" />
+    <PackageReference Include="RestSharp" />
     <PackageVersion Include="RestSharp" Version="111.0.0" />
 </ItemGroup>
   <ItemGroup>
