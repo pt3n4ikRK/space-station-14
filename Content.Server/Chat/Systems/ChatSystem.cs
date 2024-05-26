@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 using Content.Server.Administration.Logs;
 using Content.Server.Administration.Managers;
 using Content.Server.Chat.Managers;
@@ -21,6 +23,7 @@ using Content.Shared.Mobs.Systems;
 using Content.Shared.Players;
 using Content.Shared.Radio;
 using Content.Shared.Speech;
+using RestSharp;
 using Robust.Server.Player;
 using Robust.Shared.Audio;
 using Robust.Shared.Audio.Systems;
@@ -133,7 +136,7 @@ public sealed partial class ChatSystem : SharedChatSystem
     /// <param name="shell"></param>
     /// <param name="player">The player doing the speaking</param>
     /// <param name="nameOverride">The name to use for the speaking entity. Usually this should just be modified via <see cref="TransformSpeakerNameEvent"/>. If this is set, the event will not get raised.</param>
-    public void TrySendInGameICMessage(
+    public async void TrySendInGameICMessage(
         EntityUid source,
         string message,
         InGameICChatType desiredType,
@@ -143,6 +146,11 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool checkRadioPrefix = true,
         bool ignoreActionBlocker = false)
     {
+        // Переклад повідомлення
+        var translatedMessage = await TranslateMessageAsync(message, "uk", "en");
+
+        // Об'єднання оригінального повідомлення з перекладом
+        message += $"|{translatedMessage}";
         TrySendInGameICMessage(source, message, desiredType, hideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, hideLog, shell, player, nameOverride, checkRadioPrefix, ignoreActionBlocker);
     }
 
@@ -157,7 +165,7 @@ public sealed partial class ChatSystem : SharedChatSystem
     /// <param name="player">The player doing the speaking</param>
     /// <param name="nameOverride">The name to use for the speaking entity. Usually this should just be modified via <see cref="TransformSpeakerNameEvent"/>. If this is set, the event will not get raised.</param>
     /// <param name="ignoreActionBlocker">If set to true, action blocker will not be considered for whether an entity can send this message.</param>
-    public void TrySendInGameICMessage(
+    public async void TrySendInGameICMessage(
         EntityUid source,
         string message,
         InGameICChatType desiredType,
@@ -170,8 +178,15 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool ignoreActionBlocker = false
         )
     {
+        // Переклад повідомлення
+        var translatedMessage = await TranslateMessageAsync(message, "uk", "en");
+
+        // Об'єднання оригінального повідомлення з перекладом
+        message += $"|{translatedMessage}";
+
         if (HasComp<GhostComponent>(source))
         {
+
             // Ghosts can only send dead chat messages, so we'll forward it to InGame OOC.
             TrySendInGameOOCMessage(source, message, InGameOOCChatType.Dead, range == ChatTransmitRange.HideChat, shell, player);
             return;
@@ -254,7 +269,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         }
     }
 
-    public void TrySendInGameOOCMessage(
+    public async void TrySendInGameOOCMessage(
         EntityUid source,
         string message,
         InGameOOCChatType type,
@@ -263,6 +278,11 @@ public sealed partial class ChatSystem : SharedChatSystem
         ICommonSession? player = null
         )
     {
+        // Переклад повідомлення
+        var translatedMessage = await TranslateMessageAsync(message, "uk", "en");
+
+        // Об'єднання оригінального повідомлення з перекладом
+        message += $"|{translatedMessage}";
         if (!CanSendInGame(message, shell, player))
             return;
 
@@ -296,7 +316,34 @@ public sealed partial class ChatSystem : SharedChatSystem
                 break;
         }
     }
+    private async Task<string> TranslateMessageAsync(string text, string fromLanguage, string toLanguage)
+    {
+        try
+        {
+            var client = new RestClient("https://api-free.deepl.com/v2/translate");
+            var request = new RestRequest();
+            request.Method = Method.Post;
+            request.AddHeader("Authorization", "DeepL-Auth-Key [API]");
+            request.AddParameter("text", text);
+            request.AddParameter("source_lang", fromLanguage);
+            request.AddParameter("target_lang", toLanguage);
 
+            var response = await client.ExecuteAsync(request);
+            if (response.IsSuccessful && response.Content != null)
+            {
+                var jsonResponse = JsonDocument.Parse(response.Content);
+                return jsonResponse.RootElement.GetProperty("translations")[0].GetProperty("text").GetString() ?? string.Empty;
+            }
+            else
+            {
+                return $"Translation failed: {response.ErrorMessage ?? "Unknown error"}";
+            }
+        }
+        catch (Exception ex)
+        {
+            return $"Translation failed: {ex.Message}";
+        }
+    }
     #region Announcements
 
     /// <summary>
@@ -307,12 +354,12 @@ public sealed partial class ChatSystem : SharedChatSystem
     /// <param name="playSound">Play the announcement sound</param>
     /// <param name="colorOverride">Optional color for the announcement message</param>
     public void DispatchGlobalAnnouncement(
-        string message,
-        string sender = "Central Command",
-        bool playSound = true,
-        SoundSpecifier? announcementSound = null,
-        Color? colorOverride = null
-        )
+    string message,
+    string sender = "Central Command",
+    bool playSound = true,
+    SoundSpecifier? announcementSound = null,
+    Color? colorOverride = null
+    )
     {
         var wrappedMessage = Loc.GetString("chat-manager-sender-announcement-wrap-message", ("sender", sender), ("message", FormattedMessage.EscapeText(message)));
         _chatManager.ChatMessageToAll(ChatChannel.Radio, message, wrappedMessage, default, false, true, colorOverride);
@@ -966,3 +1013,4 @@ public enum ChatTransmitRange : byte
     /// Ghosts can't hear or see it at all. Regular players can if in-range.
     NoGhosts
 }
+
