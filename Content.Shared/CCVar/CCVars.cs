@@ -83,6 +83,12 @@ namespace Content.Shared.CCVar
         public static readonly CVarDef<float> LobbyMusicVolume =
             CVarDef.Create("ambience.lobby_music_volume", 0.50f, CVar.ARCHIVE | CVar.CLIENTONLY);
 
+
+
+        public static readonly CVarDef<string> TranslatorLanguage =
+            CVarDef.Create("translator.language", "EN", CVar.ARCHIVE | CVar.CLIENTONLY);
+
+
         /// <summary>
         /// UI volume.
         /// </summary>
@@ -1817,9 +1823,17 @@ namespace Content.Shared.CCVar
         public static readonly CVarDef<int> ResourceUploadingStoreDeletionDays =
             CVarDef.Create("netres.store_deletion_days", 30, CVar.SERVER | CVar.SERVERONLY);
 
-        /*
-         * Controls
-         */
+
+        // Включення або вимкнення перекладу повідомлень
+        public static readonly CVarDef<bool> EnableTranslator =
+            CVarDef.Create("translator.enable", true, CVar.ARCHIVE | CVar.CLIENTONLY);
+
+        /// <summary>
+        /// Мова, встановлена користувачем для перекладу.
+        /// </summary>
+        public static readonly CVarDef<string> ClientTranslatorLanguage =
+            CVarDef.Create("translator.language", "EN", CVar.ARCHIVE | CVar.CLIENTONLY);
+
 
         /// <summary>
         /// Deadzone for drag-drop interactions.

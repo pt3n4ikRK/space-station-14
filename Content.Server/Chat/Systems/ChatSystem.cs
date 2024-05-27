@@ -146,11 +146,6 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool checkRadioPrefix = true,
         bool ignoreActionBlocker = false)
     {
-        // Переклад повідомлення
-        var translatedMessage = await TranslateMessageAsync(message, "uk", "en");
-
-        // Об'єднання оригінального повідомлення з перекладом
-        message += $"|{translatedMessage}";
         TrySendInGameICMessage(source, message, desiredType, hideChat ? ChatTransmitRange.HideChat : ChatTransmitRange.Normal, hideLog, shell, player, nameOverride, checkRadioPrefix, ignoreActionBlocker);
     }
 
@@ -178,12 +173,7 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool ignoreActionBlocker = false
         )
     {
-        // Переклад повідомлення
-        var translatedMessage = await TranslateMessageAsync(message, "uk", "en");
-
-        // Об'єднання оригінального повідомлення з перекладом
-        message += $"|{translatedMessage}";
-
+    
         if (HasComp<GhostComponent>(source))
         {
 
@@ -278,11 +268,6 @@ public sealed partial class ChatSystem : SharedChatSystem
         ICommonSession? player = null
         )
     {
-        // Переклад повідомлення
-        var translatedMessage = await TranslateMessageAsync(message, "uk", "en");
-
-        // Об'єднання оригінального повідомлення з перекладом
-        message += $"|{translatedMessage}";
         if (!CanSendInGame(message, shell, player))
             return;
 
@@ -314,34 +299,6 @@ public sealed partial class ChatSystem : SharedChatSystem
             case InGameOOCChatType.Looc:
                 SendLOOC(source, player, message, hideChat);
                 break;
-        }
-    }
-    private async Task<string> TranslateMessageAsync(string text, string fromLanguage, string toLanguage)
-    {
-        try
-        {
-            var client = new RestClient("https://api-free.deepl.com/v2/translate");
-            var request = new RestRequest();
-            request.Method = Method.Post;
-            request.AddHeader("Authorization", "DeepL-Auth-Key [API]");
-            request.AddParameter("text", text);
-            request.AddParameter("source_lang", fromLanguage);
-            request.AddParameter("target_lang", toLanguage);
-
-            var response = await client.ExecuteAsync(request);
-            if (response.IsSuccessful && response.Content != null)
-            {
-                var jsonResponse = JsonDocument.Parse(response.Content);
-                return jsonResponse.RootElement.GetProperty("translations")[0].GetProperty("text").GetString() ?? string.Empty;
-            }
-            else
-            {
-                return $"Translation failed: {response.ErrorMessage ?? "Unknown error"}";
-            }
-        }
-        catch (Exception ex)
-        {
-            return $"Translation failed: {ex.Message}";
         }
     }
     #region Announcements

@@ -28,4 +28,12 @@
   </ItemGroup>
   <Import Project="..\RobustToolbox\MSBuild\Robust.Properties.targets" />
   <Import Project="..\RobustToolbox\MSBuild\XamlIL.targets" />
+  <ItemGroup>
+    <EmbeddedResource Remove="options\ui\tabs\TranslatorTab.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Update="Options\UI\Tabs\TranslatorTab.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </AdditionalFiles>
+  </ItemGroup>
 </Project>

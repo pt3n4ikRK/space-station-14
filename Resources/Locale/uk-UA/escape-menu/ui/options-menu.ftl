@@ -4,6 +4,7 @@ ui-options-title = Game Options
 ui-options-tab-graphics = Graphics
 ui-options-tab-controls = Controls
 ui-options-tab-audio = Audio
+ui-options-tab-translator = Перекладач
 ui-options-tab-network = Network
 ui-options-tab-misc = General
 
