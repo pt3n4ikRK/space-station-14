@@ -1,12 +1,15 @@
 <Control xmlns="https://spacestation14.io"
+         xmlns:tabs="clr-namespace:Content.Client.Options.UI.Tabs"
          xmlns:controls="clr-namespace:Robust.Client.UserInterface.Controls">
     <BoxContainer Orientation="Vertical">
-        <Label Text="Enable Translator: " />
-        <CheckBox Name="CheckEnabledTranslator" />
-    </BoxContainer>
-    <BoxContainer>
-        <Label Text="Select Language: " />
-        <Control MinSize="4 0" />
-        <OptionButton Name="SelectLanguageButton" />
+        <BoxContainer Orientation="Vertical" Margin="8 8 8 8" VerticalExpand="True">
+            <Label Text="Enable Translator: " />
+            <CheckBox Name="CheckEnabledTranslator" />
+        </BoxContainer>
+        <BoxContainer>
+            <Label Text="Select Language: " />
+            <Control MinSize="4 0" />
+            <OptionButton Name="SelectLanguageButton" />
+        </BoxContainer>
     </BoxContainer>
 </Control>
