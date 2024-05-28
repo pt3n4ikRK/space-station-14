@@ -1,4 +1,5 @@
-﻿using Content.Shared.Administration;
+using System.Globalization;
+using Content.Shared.Administration;
 using Content.Shared.GameTicking;
 using Content.Shared.Mind;
 using Robust.Shared.Network;
@@ -43,9 +44,13 @@ public sealed class ContentPlayerData
     /// </summary>
     public bool Stealthed { get; set; }
 
+    public CultureInfo Culture { get; set; }
+
     public ContentPlayerData(NetUserId userId, string name)
     {
         UserId = userId;
         Name = name;
+
+        Culture = CultureInfo.CurrentCulture;
     }
 }

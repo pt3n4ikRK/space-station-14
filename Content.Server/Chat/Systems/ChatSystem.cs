@@ -178,11 +178,23 @@ public sealed partial class ChatSystem : SharedChatSystem
         bool ignoreActionBlocker = false
         )
     {
-        // Переклад повідомлення
-        var translatedMessage = await TranslateMessageAsync(message, "uk", "en");
+        // Отримання мови введення/виведення користувача з налаштувань оперативної системи
+        var inputLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+
+        // Визначення мови виведення (на яку потрібно перекладати текст)
+        var outputLanguage = inputLanguage switch
+        {
+            "en" => "uk", // якщо вхідна мова - англійська, виводимо українську
+            "uk" => "en", // якщо вхідна мова - українська, виводимо англійську
+            _ => "uk" // за замовчуванням перекладати українською
+        };
+
+        // Видавання запиту з врахуванням мов користувача
+        var translatedMessage = await TranslateMessageAsync(message, inputLanguage, outputLanguage);
 
         // Об'єднання оригінального повідомлення з перекладом
         message += $"|{translatedMessage}";
+
 
         if (HasComp<GhostComponent>(source))
         {
@@ -323,7 +335,7 @@ public sealed partial class ChatSystem : SharedChatSystem
             var client = new RestClient("https://api-free.deepl.com/v2/translate");
             var request = new RestRequest();
             request.Method = Method.Post;
-            request.AddHeader("Authorization", "DeepL-Auth-Key [API]");
+            request.AddHeader("Authorization", "DeepL-Auth-Key 551e7445-6f80-42f3-ba81-f2338c1868a3:fx");
             request.AddParameter("text", text);
             request.AddParameter("source_lang", fromLanguage);
             request.AddParameter("target_lang", toLanguage);
